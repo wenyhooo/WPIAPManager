@@ -1,0 +1,7 @@
+platform :ios, '7.0'
+
+inhibit_all_warnings!
+
+target ‘WPIAPDemo’ do
+   pod 'UICKeyChainStore', '~> 2.0.7'
+end
