@@ -16,6 +16,7 @@
 		FEC8E6E01F3AAD650000C74F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FEC8E6DE1F3AAD650000C74F /* LaunchScreen.storyboard */; };
 		FEE2054E1F3C55B70002B40E /* WPIAPHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = FEE2054B1F3C55B70002B40E /* WPIAPHelper.m */; };
 		FEE2054F1F3C55B70002B40E /* WPIAPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = FEE2054D1F3C55B70002B40E /* WPIAPManager.m */; };
+		FEE205511F3C562D0002B40E /* WPIAPManager.podspec in Resources */ = {isa = PBXBuildFile; fileRef = FEE205501F3C562D0002B40E /* WPIAPManager.podspec */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +37,7 @@
 		FEE2054B1F3C55B70002B40E /* WPIAPHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WPIAPHelper.m; sourceTree = "<group>"; };
 		FEE2054C1F3C55B70002B40E /* WPIAPManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WPIAPManager.h; sourceTree = "<group>"; };
 		FEE2054D1F3C55B70002B40E /* WPIAPManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WPIAPManager.m; sourceTree = "<group>"; };
+		FEE205501F3C562D0002B40E /* WPIAPManager.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = WPIAPManager.podspec; path = ../WPIAPManager.podspec; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,6 +72,7 @@
 		FEC8E6C41F3AAD650000C74F = {
 			isa = PBXGroup;
 			children = (
+				FEE205501F3C562D0002B40E /* WPIAPManager.podspec */,
 				FEC8E6CF1F3AAD650000C74F /* WPIAPDemo */,
 				FEC8E6CE1F3AAD650000C74F /* Products */,
 				EEDA024178FD9A3E7429EE8D /* Pods */,
@@ -184,6 +187,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FEE205511F3C562D0002B40E /* WPIAPManager.podspec in Resources */,
 				FEC8E6E01F3AAD650000C74F /* LaunchScreen.storyboard in Resources */,
 				FEC8E6DD1F3AAD650000C74F /* Assets.xcassets in Resources */,
 				FEC8E6DB1F3AAD650000C74F /* Main.storyboard in Resources */,
