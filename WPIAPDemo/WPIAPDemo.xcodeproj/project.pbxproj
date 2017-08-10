@@ -14,8 +14,8 @@
 		FEC8E6DB1F3AAD650000C74F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FEC8E6D91F3AAD650000C74F /* Main.storyboard */; };
 		FEC8E6DD1F3AAD650000C74F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FEC8E6DC1F3AAD650000C74F /* Assets.xcassets */; };
 		FEC8E6E01F3AAD650000C74F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FEC8E6DE1F3AAD650000C74F /* LaunchScreen.storyboard */; };
-		FEC8E6F61F3AF3320000C74F /* WPIAPHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = FEC8E6F31F3AF3320000C74F /* WPIAPHelper.m */; };
-		FEC8E6F71F3AF3320000C74F /* WPIAPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = FEC8E6F51F3AF3320000C74F /* WPIAPManager.m */; };
+		FEE2054E1F3C55B70002B40E /* WPIAPHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = FEE2054B1F3C55B70002B40E /* WPIAPHelper.m */; };
+		FEE2054F1F3C55B70002B40E /* WPIAPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = FEE2054D1F3C55B70002B40E /* WPIAPManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,10 +32,10 @@
 		FEC8E6DC1F3AAD650000C74F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FEC8E6DF1F3AAD650000C74F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FEC8E6E11F3AAD650000C74F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		FEC8E6F21F3AF3320000C74F /* WPIAPHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WPIAPHelper.h; sourceTree = "<group>"; };
-		FEC8E6F31F3AF3320000C74F /* WPIAPHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WPIAPHelper.m; sourceTree = "<group>"; };
-		FEC8E6F41F3AF3320000C74F /* WPIAPManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WPIAPManager.h; sourceTree = "<group>"; };
-		FEC8E6F51F3AF3320000C74F /* WPIAPManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WPIAPManager.m; sourceTree = "<group>"; };
+		FEE2054A1F3C55B70002B40E /* WPIAPHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WPIAPHelper.h; sourceTree = "<group>"; };
+		FEE2054B1F3C55B70002B40E /* WPIAPHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WPIAPHelper.m; sourceTree = "<group>"; };
+		FEE2054C1F3C55B70002B40E /* WPIAPManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WPIAPManager.h; sourceTree = "<group>"; };
+		FEE2054D1F3C55B70002B40E /* WPIAPManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WPIAPManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,7 +88,7 @@
 		FEC8E6CF1F3AAD650000C74F /* WPIAPDemo */ = {
 			isa = PBXGroup;
 			children = (
-				FEC8E6F11F3AF3320000C74F /* WPIAPManager */,
+				FEE205491F3C55B70002B40E /* WPIAPManager */,
 				FEC8E6D31F3AAD650000C74F /* AppDelegate.h */,
 				FEC8E6D41F3AAD650000C74F /* AppDelegate.m */,
 				FEC8E6D61F3AAD650000C74F /* ViewController.h */,
@@ -110,15 +110,16 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		FEC8E6F11F3AF3320000C74F /* WPIAPManager */ = {
+		FEE205491F3C55B70002B40E /* WPIAPManager */ = {
 			isa = PBXGroup;
 			children = (
-				FEC8E6F21F3AF3320000C74F /* WPIAPHelper.h */,
-				FEC8E6F31F3AF3320000C74F /* WPIAPHelper.m */,
-				FEC8E6F41F3AF3320000C74F /* WPIAPManager.h */,
-				FEC8E6F51F3AF3320000C74F /* WPIAPManager.m */,
+				FEE2054A1F3C55B70002B40E /* WPIAPHelper.h */,
+				FEE2054B1F3C55B70002B40E /* WPIAPHelper.m */,
+				FEE2054C1F3C55B70002B40E /* WPIAPManager.h */,
+				FEE2054D1F3C55B70002B40E /* WPIAPManager.m */,
 			);
-			path = WPIAPManager;
+			name = WPIAPManager;
+			path = ../../WPIAPManager;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -248,9 +249,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				FEC8E6D81F3AAD650000C74F /* ViewController.m in Sources */,
-				FEC8E6F61F3AF3320000C74F /* WPIAPHelper.m in Sources */,
+				FEE2054E1F3C55B70002B40E /* WPIAPHelper.m in Sources */,
 				FEC8E6D51F3AAD650000C74F /* AppDelegate.m in Sources */,
-				FEC8E6F71F3AF3320000C74F /* WPIAPManager.m in Sources */,
+				FEE2054F1F3C55B70002B40E /* WPIAPManager.m in Sources */,
 				FEC8E6D21F3AAD650000C74F /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

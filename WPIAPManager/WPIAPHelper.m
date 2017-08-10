@@ -8,17 +8,25 @@
 
 #import "WPIAPHelper.h"
 
-@interface WPIAPHelper ()
+@interface WPIAPHelper ()<SKProductsRequestDelegate, SKPaymentTransactionObserver>
+
 @property (nonatomic, strong) SKProductsRequest *skProductRequest;
 @property(nonatomic, copy) void (^successBlock)(NSArray<SKProduct*> *productList);
 @property(nonatomic, copy) void (^errorBlock)(NSError *error);
 @property(nonatomic, copy) WPIAPPaymentStateBlock paymentStateBlock;
-@end
-@implementation WPIAPHelper
 
+@end
+
+@implementation WPIAPHelper
 
 #pragma mark - public 加载Product信息
 
+/**
+ 去苹果请求内购
+ @param ids 内购id
+ @param successBlock 成功
+ @param errorBlock 失败
+ */
 - (void)loadProductsWithIdentifiers:(NSSet *)ids
                        successBlock:(void (^)(NSArray<SKProduct*> *productList))successBlock
                          errorBlock:(void (^)(NSError *error))errorBlock
@@ -57,26 +65,29 @@
 }
 
 #pragma mark - SKProductsRequestDelegate
-- (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response {
+- (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response
+{
     if (self.successBlock) {
         self.successBlock(response.products);
     }
 }
 
-- (void)request:(SKRequest *)request didFailWithError:(NSError *)error {
+- (void)request:(SKRequest *)request didFailWithError:(NSError *)error
+{
     if (self.errorBlock) {
         self.errorBlock(error);
     }
 }
 
 #pragma mark - SKPaymentTransactionObserver
-- (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray *)transactions {
+- (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray *)transactions
+{
     for (SKPaymentTransaction *transaction in transactions) {
+        NSLog(@"iap---苹果处理流程-->description =%@,transactionState = %ld", transaction.error.localizedDescription,(long)transaction.transactionState);
         if (self.paymentStateBlock) {
             self.paymentStateBlock(transaction);
         }
     }
 }
-
 
 @end

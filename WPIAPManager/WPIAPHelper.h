@@ -11,7 +11,7 @@
 
 typedef void(^WPIAPPaymentStateBlock)(SKPaymentTransaction *transaction);
 
-@interface WPIAPHelper : NSObject<SKProductsRequestDelegate, SKPaymentTransactionObserver>
+@interface WPIAPHelper : NSObject
 
 /**
  去苹果请求内购
@@ -19,7 +19,6 @@ typedef void(^WPIAPPaymentStateBlock)(SKPaymentTransaction *transaction);
  @param successBlock 成功
  @param errorBlock 失败
  */
-
 - (void)loadProductsWithIdentifiers:(NSSet *)ids
                        successBlock:(void (^)(NSArray<SKProduct*> *productList))successBlock
                          errorBlock:(void (^)(NSError *error))errorBlock;

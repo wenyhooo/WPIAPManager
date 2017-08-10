@@ -20,7 +20,6 @@
 #define WPIAPReceiptKey [[NSBundle mainBundle]bundleIdentifier]
 #define WPIAPOrderKey [NSString stringWithFormat:@"%@order",WPIAPReceiptKey]
 
-
 @interface WPIAPManager ()
 
 @property(nonatomic, strong) NSMutableDictionary *skProductDic;
@@ -44,7 +43,7 @@
     return manager;
 }
 
-#pragma mark - 检查历史一流订单
+#pragma mark - public 检查历史一流订单
 
 /**
  检查是否有历史充值问题
@@ -56,35 +55,17 @@
     if (!isResum) {
         __weak __typeof(self)weakSelf = self;
         [self.iapHelper resumeUnfinishedPaymentState:^(SKPaymentTransaction *transaction) {
+            WPIAPlog(@"iap---检查有未结束订单,从apple service中恢复");
             [weakSelf disposePayTranscationState:transaction];
         }];
     }
 }
 
 /**
- 检查本地cache是否有历史充值问题,有充值未到账的
- @param resumBlock 如果有订单恢复  会回调
- @return yes/no  有无历史单子
- */
-- (BOOL)checklocalityCacheHistoryIAPOrderResumBlock:(WPbuyIapSuccessBlock)resumBlock
-{
-    NSString *receiptString = [UICKeyChainStore stringForKey:WPIAPReceiptKey];
-    NSString *orderString = [UICKeyChainStore stringForKey:WPIAPOrderKey];
-    
-    NSDictionary *orderDic = [self dictionaryWithJsonString:orderString];
-    if (receiptString && orderDic){
-        WPIAPlog(@"检查有未结束订单,从沙盒中恢复");
-        !resumBlock? :resumBlock(orderDic,receiptString);
-        return YES;
-    }
-    return NO;
-}
-
-/**
  iap购买
  @param productIdfier 商品ID
  @param orderDic  携带的订单信息 会随着购买凭证存入KeyChain,
- @param buySuccessBlock 购买成功
+ @param buySuccessBlock 购买成功后 需要向自己服务端验证 成功后要手动调用   cleanAppleOrderInfo
  @param buyFailBlock 购买失败
  */
 - (void)buyAppleWithSKProductIdfier:(NSString *)productIdfier withOrderDic:(NSDictionary *)orderDic buySuccessBlock:(WPbuyIapSuccessBlock)buySuccessBlock buyFailBlock:(void (^)(NSError *error))buyFailBlock
@@ -100,9 +81,35 @@
 }
 
 /**
+ iap购买
+ @param productIdfier 商品ID
+ @param orderDic  携带的订单信息 会随着购买凭证存入KeyChain,
+ @param buySuccessBlock 购买成功后 需要向自己服务端验证 成功后要手动调用   cleanAppleOrderInfo
+ @param buyFailBlock 购买失败
+ */
+- (void)buyAppleWithSKProduct:(SKProduct *)skProduct withOrderDic:(NSDictionary *)orderDic buySuccessBlock:(WPbuyIapSuccessBlock )buySuccessBlock buyFailBlock:(void (^)(NSError *error))buyFailBlock
+{
+    BOOL isResum = [self checklocalityCacheHistoryIAPOrderResumBlock:buySuccessBlock];
+    if (isResum) {
+        return ;
+    }
+    _buySuccessBlock = buySuccessBlock;
+    _buyFailBlock = buyFailBlock;
+    
+    //存下订单信息
+    NSString *orderString = [self dictionaryToJson:orderDic];
+    [UICKeyChainStore setString:orderString forKey:WPIAPOrderKey];
+    
+    __weak __typeof(self)weakSelf = self;
+    [self.iapHelper buyProduct:skProduct paymentState:^(SKPaymentTransaction *transaction) {
+        [weakSelf disposePayTranscationState:transaction];
+    }];
+}
+
+/**
  订单验证成功后或者认定丢弃 调用
  */
-- (void)cleanAppleOrderInfo
++ (void)cleanAppleOrderInfo
 {
     [UICKeyChainStore removeItemForKey:WPIAPReceiptKey];
     [UICKeyChainStore removeItemForKey:WPIAPOrderKey];
@@ -119,6 +126,7 @@
     SKProduct *skProduct = self.skProductDic[productIdfier];
     if (skProduct) {
         !searchSuccessBlock? :searchSuccessBlock(skProduct);
+        return;
     }
     
     NSSet *productIdentifiers = [NSSet setWithObject:productIdfier];
@@ -132,59 +140,60 @@
             dic[skProduct.productIdentifier] = skProduct;
         }
         [weakSelf.skProductDic setDictionary:dic];
-        SKProduct *skProduct = self.skProductDic[productIdentifiers];
+        SKProduct *skProduct = self.skProductDic[productIdfier];
         !searchSuccessBlock? :searchSuccessBlock(skProduct);
     } errorBlock:failBlock];
 }
 
-- (void)buyAppleWithSKProduct:(SKProduct *)skProduct withOrderDic:(NSDictionary *)orderDic buySuccessBlock:(WPbuyIapSuccessBlock )buySuccessBlock buyFailBlock:(void (^)(NSError *error))buyFailBlock
+/**
+ 去苹果服务器查询商品
+ @param productIdfierList 商品ID list
+ @param searchSuccessBlock 查询成功
+ @param failBlock 查询失败
+ */
+- (void)searchAppleProductList:(NSSet *)productIdfierList searchSuccessBlock:(void (^)(NSArray<SKProduct *> *skRroduct))searchSuccessBlock failBlock:(void (^)(NSError *error))failBlock
 {
-    BOOL isResum = [self checklocalityCacheHistoryIAPOrderResumBlock:buySuccessBlock];
-    if (isResum) {
-        return ;
-    }
-    _buySuccessBlock = buySuccessBlock;
-    _buyFailBlock = buyFailBlock;
-    
-//存下订单信息
-    NSString *orderString = [self dictionaryToJson:orderDic];
-    [UICKeyChainStore setString:orderString forKey:WPIAPReceiptKey];
-    
     __weak __typeof(self)weakSelf = self;
-    [self.iapHelper buyProduct:skProduct paymentState:^(SKPaymentTransaction *transaction) {
-        [weakSelf disposePayTranscationState:transaction];
-    }];
+    
+    [self.iapHelper loadProductsWithIdentifiers:productIdfierList successBlock:^(NSArray<SKProduct *> *productList) {
+        NSMutableDictionary *dic = [NSMutableDictionary new];
+        
+        for (SKProduct *skProduct in productList) {
+            dic[skProduct.productIdentifier] = skProduct;
+        }
+        [weakSelf.skProductDic setDictionary:dic];
+        !searchSuccessBlock? :searchSuccessBlock(productList);
+    } errorBlock:failBlock];
 }
 
-#pragma mark - action
+#pragma mark - SKPaymentTransactionObserver
 //购买过程中的回调处理
 - (void)disposePayTranscationState:(SKPaymentTransaction *)transaction
 {
-    WPIAPlog(@"苹果处理流程-->description =%@,transactionState = %ld", transaction.error.localizedDescription,(long)transaction.transactionState);
     switch (transaction.transactionState)
     {
         case SKPaymentTransactionStatePurchasing:
-            WPIAPlog(@"正在付款");
+            WPIAPlog(@"iap---正在付款");
             break;
             
         case SKPaymentTransactionStateDeferred:
-            WPIAPlog(@"正在延迟");
+            WPIAPlog(@"iap---正在延迟");
             break;
             
         case SKPaymentTransactionStatePurchased:{
-            WPIAPlog(@"付款完成");
+            WPIAPlog(@"iap---付款完成");
             [self productPayed:transaction];
         }
             break;
             
         case SKPaymentTransactionStateFailed:
-            WPIAPlog(@"付款失败-->%@", transaction.error.localizedDescription);
+            WPIAPlog(@"iap---付款失败-->%@", transaction.error.localizedDescription);
             [self productPayFailed:transaction];
             break;
             
         case SKPaymentTransactionStateRestored:
-            WPIAPlog(@"付款已恢复");
-            [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+            WPIAPlog(@"iap---付款已恢复");
+            [self productPayed:transaction];
             break;
             
         default:
@@ -195,9 +204,7 @@
 #pragma mark - action - 购买成功
 - (void)productPayed:(SKPaymentTransaction *)transaction
 {
-    NSURL *url = [[NSBundle mainBundle] appStoreReceiptURL];
-    NSData *data = [NSData dataWithContentsOfURL:url];
-    NSString *receiptString = [data base64EncodedStringWithOptions:0];
+    NSString *receiptString = [self receiptString];
     
     if (receiptString) {
         //此时正确购买，保存该凭证
@@ -208,8 +215,7 @@
     }
     [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
     
-    NSString *orderString = [UICKeyChainStore stringForKey:WPIAPOrderKey];
-    NSDictionary *orderDic = [self dictionaryWithJsonString:orderString];
+    NSDictionary *orderDic = [self orderDic];
     !_buySuccessBlock? :_buySuccessBlock(orderDic,receiptString);
 }
 
@@ -217,7 +223,8 @@
 - (void)productPayFailed:(SKPaymentTransaction *)transaction
 {
     [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
-    _buyFailBlock? :_buyFailBlock(transaction.error);
+    
+    !_buyFailBlock? :_buyFailBlock(transaction.error);
 }
 
 #pragma mark - geter
@@ -229,7 +236,48 @@
     return _iapHelper;
 }
 
+- (NSMutableDictionary *)skProductDic
+{
+    if (!_skProductDic) {
+        _skProductDic = [NSMutableDictionary new];
+    }
+    return _skProductDic;
+}
+
 #pragma mark - pravite
+
+/**
+ 检查本地cache是否有历史充值问题,有充值未到账的
+ @param resumBlock 如果有订单恢复  会回调
+ @return yes/no  有无历史单子
+ */
+- (BOOL)checklocalityCacheHistoryIAPOrderResumBlock:(WPbuyIapSuccessBlock)resumBlock
+{
+    NSString *receiptString = [UICKeyChainStore stringForKey:WPIAPReceiptKey];
+    NSString *orderString = [UICKeyChainStore stringForKey:WPIAPOrderKey];
+    
+    NSDictionary *orderDic = [self dictionaryWithJsonString:orderString];
+    if (receiptString && orderDic){
+        WPIAPlog(@"iap---检查有未结束订单,从沙盒中恢复");
+        !resumBlock? :resumBlock(orderDic,receiptString);
+        return YES;
+    }
+    return NO;
+}
+
+- (NSString *)receiptString
+{
+    NSURL *url = [[NSBundle mainBundle] appStoreReceiptURL];
+    NSData *data = [NSData dataWithContentsOfURL:url];
+    NSString *receiptString = [data base64EncodedStringWithOptions:0];
+    return receiptString;
+}
+- (NSDictionary *)orderDic
+{
+    NSString *orderString = [UICKeyChainStore stringForKey:WPIAPOrderKey];
+    NSDictionary *orderDic = [self dictionaryWithJsonString:orderString];
+    return orderDic;
+}
 
 - (NSString*)dictionaryToJson:(NSDictionary *)dic
 {
@@ -249,7 +297,7 @@
                                                         options:NSJSONReadingMutableContainers
                                                           error:&err];
     if(err) {
-        NSLog(@"json解析失败：%@",err);
+        WPIAPlog(@"iap---json解析失败：%@",err);
         return nil;
     }
     return dic;
